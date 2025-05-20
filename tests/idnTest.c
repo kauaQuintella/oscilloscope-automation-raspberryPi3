@@ -18,7 +18,7 @@ int main() {
     const char* device = "/dev/usbtmc0";
     const char* cmd = "*IDN?\n";
     char buffer[256] = {0};
-
+    
     int fd = open(device, O_RDWR);
     if (fd < 0) {
         perror("Erro ao abrir dispositivo");
@@ -31,7 +31,7 @@ int main() {
         return 1;
     }
 
-    usleep(100000); // Espera 100ms
+    //usleep(100000); // Espera 100ms
 
     int n = read(fd, buffer, sizeof(buffer) - 1);
     if (n < 0) {
@@ -42,7 +42,6 @@ int main() {
 
     buffer[n] = '\0';
     printf("Resposta: %s\n", buffer);
-
     close(fd);
     return 0;
 }
