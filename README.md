@@ -45,3 +45,7 @@ Projeto da Iniciação Tecnológica com o intuito de criar uma automação para 
         sudo cat /dev/usbtmc0
 
     O comando *IDN? solicita a identificação do instrumento. A resposta deve conter modelo e fabricante.
+
+## Referências
+
+https://www.youtube.com/watch?v=5glH8dGoeCA
