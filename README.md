@@ -2,11 +2,33 @@
 
 Projeto da Iniciação Tecnológica com o intuito de criar uma automação para o osciloscópio digital TDS 2024C e enviar os dados para uma cloud. Neste projeto, estamos usando a comunicação USBTMC para obter os querries do ociliscópio.
 
+### Configuração de ambiente
+
+Para criar o projeto, foi usado o template obtido no vídeo How to Properly Setup C++ Projects[1]. Para configuração do ambiente, é necessário executar o "Setup-Linux.sh" em "Scripts" que vai gerar o Makefile do nosso projeto através do Premake. Contudo, o binário premake5 que está no código não é compatível com a arquitetura do Raspberry Pi 3, já que ele é ARM. Para solucionar isso, foi necessário compilar o Premake no Raspberry executando os seguintes passos na pasta "./Vendor/Binaries/Premake":
+
+        sudo apt update
+        git clone --recursive https://github.com/premake/premake-core.git
+        cd premake-core
+        make -f Bootstrap.mak linux
+
+Nesse projeto, houve-se o erro de falta da biblioteca de desenvolvimento de UUID e para isto, bastou fazer a instalação dela pelo comando:
+
+        sudo apt install -y uuid-dev
+
+Após isso, fez-se necessário substituir o diretório do premake5 para "Vendor/Binaries/Premake/Linux/premake-core/bin/release/premake5", que é o caminho relativo dele. No final, o Setup-Linux.sh ficou assim:
+
+        #!/bin/bash
+
+        pushd ..
+        Vendor/Binaries/Premake/Linux/premake-core/bin/release/premake5 --cc=clang --file=Build.lua gmake2
+        popd
+
+E dessa forma, executando normalmente ao executar.
+
 #### Entendendo a comunicação USBTMC
 - O osciloscópio suporta o protocolo USBTMC (USB Test & Measurement Class).
 - Ele aparece no sistema como um dispositivo de caractere em /dev/usbtmc0.
 - Esse dispositivo aceita comandos SCPI, como *IDN?, e responde diretamente.
-
 
 ## Passo a passo para realização do teste
 
@@ -48,4 +70,4 @@ Projeto da Iniciação Tecnológica com o intuito de criar uma automação para 
 
 ## Referências
 
-https://www.youtube.com/watch?v=5glH8dGoeCA
+[1] https://www.youtube.com/watch?v=5glH8dGoeCA
