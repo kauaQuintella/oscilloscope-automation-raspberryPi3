@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <StartupObject>TekOscilloscopeCommunication.Program</StartupObject>
+    <ApplicationIcon />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Prefer32Bit>true</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="TekVISANet">
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC_32\TekVISANet\1.1.1.0__7f19bb2a5a9ae6e8\TekVISANet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

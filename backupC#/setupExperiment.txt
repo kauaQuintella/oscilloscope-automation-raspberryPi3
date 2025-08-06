@@ -1,0 +1,31 @@
+# backup experiment and run? binary boolean value 
+BKP?=0
+
+# folder directory 
+FLD_DIR=C:/Users/projetoMCA/Desktop/kauaWorkspace/projetoComunicacao/EXPERIMENTOS_TESTE/
+
+# file name (if bkp=1 and named file no exist: erro) (if bkp=0 and named file already exists, confirmation message) 
+FILE_NAME=crazyDiamondExperimentation
+
+# channel (only CH1 to CH4) 
+CHANNEL=CH1
+
+# binary bolean values only and XOR option  
+COUNT_EVENTS_MODE=1
+DAYS_COUNT_MODE=0
+
+# if in countEventsMode
+QNT_ACQUISITION=5
+
+# if in daysCountMode 
+MINUTE_MODE=0
+QNT_TIME=72
+
+# measurament setting (use ociloscope command syntax) 
+MEAS1=PK2PK
+MEAS2=RISE
+MEAS3=NWIDTH 
+MEAS4=FALL
+MEAS5=???
+
+Crie uma função que receba como parâmetros um diretôrio e que nele seja criado 4 arquivos
