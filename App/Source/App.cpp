@@ -10,8 +10,7 @@ expected: TEKTRONIX,TDS 2024C,C042765,CF:91.1CT FV:v24.26
 
 using namespace std;
 
-#include "Core/Core.h"
-#include "Core/TekVISA.cpp"
+#include "TekVISA.cpp"
 
 #include <fstream>
 #include <string>
@@ -42,12 +41,10 @@ int main()
 	const std::string nameExperiment = "teste";
 	const std::string channel="CH1";
 	const int maxEvents = 20;
-
-	Core::PrintHelloWorld();
 	
 	cout << "Configurations: ";
-	fd = Tv.SetChannel(channel);
-	fd = Tv.SetMeasurement(channel);
+	Tv.SetChannel(channel);
+	Tv.SetMeasurement(channel);
 
     
 }
