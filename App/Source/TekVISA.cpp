@@ -7,6 +7,9 @@ using namespace std;
 #include <unistd.h>
 #include <cstring>
 #include <cerrno>
+#include <list>
+#include <sstream>
+#include <boost>
 
 class Mailman {
 public:
@@ -30,7 +33,7 @@ public:
     }
 
     // Método para enviar um comando
-    int Send(const std::string& cmd) {
+    int Send(const string& cmd) {
         if (fd < 0) {
             std::cerr << "Dispositivo não está aberto." << std::endl;
             return 1;
@@ -50,7 +53,7 @@ public:
     }
 
     // Método para receber uma resposta
-    std::string Receive() {
+    string Receive() {
         if (fd < 0) {
             std::cerr << "Dispositivo não está aberto." << std::endl;
             return "";
@@ -75,7 +78,7 @@ public:
         string idn_cmd = "*IDN?\n";
         mailman.Send(idn_cmd);
         string idn_response = mailman.Receive();
-        std::cout << "Identificação do instrumento: " << idn_response << std::endl;
+        cout << "Identificação do instrumento: " << idn_response << endl;
     }
 
     // MÉTODO PARA DEFINIR O CANAL ATUAL
@@ -96,11 +99,51 @@ public:
             mailman.Send(cmd2);
         }
     }
+
+    void Run()
+    {
+        mailman.Send("ACQUIRE:STATE ON;");
+    }
+    
+    list<string> GetMeasurementsIMM(list<string> masurements)
+    {
+        string meas;
+        string esr;
+        list<string> all;
+        for (int i = 0; i < masurements.Count(); i++)
+        {
+            mailman.Send("MEASU:IMM:TYPE {masurements[i]}");
+            mailman.Send("MEASU:IMM:VAL?");
+            meas = mailman.Receive();
+
+            mailman.Send("*ESR?");
+            esr = mailman.Receive();
+
+            if (esr != "16")
+            {
+                all.Add(meas);
+            }
+        }
+        return all;
+    }
+
+    list<string> GetData()
+    {
+        string all;
+        list<string> data;
+        bool status;
+        mailman.Send("MEASU:MEAS1:VAL?;:MEASU:MEAS2:VAL?;:MEASU:MEAS3:VAL?;:MEASU:MEAS4:VAL?");
+        istringstream iss(mailman.Receive());
+        iss >> status;
+
+        if (!status)
+            cout << "Erro ao recuperar dados";
+
+        split(data, all, is_any_of(","));
+        return data;
+    }
+
+
+
 };
 
-int main() {
-    TekVISA scope;
-    scope.SetChannel("CH1");
-    scope.SetMeasurement("CH1");
-    return 0;
-}
