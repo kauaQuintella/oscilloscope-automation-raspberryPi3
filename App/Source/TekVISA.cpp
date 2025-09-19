@@ -1,3 +1,4 @@
+/*
 using namespace std;
 
 #include <iostream>
@@ -146,4 +147,123 @@ public:
 
 
 };
+*/
 
+#include "TekVISA.h"
+#include <iostream>
+#include <sstream>
+#include <unistd.h> // Para usleep
+
+TekVISA::TekVISA(const std::string& devicePath) : devicePath_(devicePath) {}
+
+TekVISA::~TekVISA() {
+    if (deviceFile_.is_open()) {
+        deviceFile_.close();
+    }
+}
+
+bool TekVISA::Connect() {
+    // Abre o arquivo do dispositivo para leitura e escrita
+    deviceFile_.open(devicePath_, std::ios::in | std::ios::out);
+    if (!deviceFile_.is_open()) {
+        throw std::runtime_error("Erro: Nao foi possivel conectar com o osciloscopio em " + devicePath_);
+    }
+    return true;
+}
+
+void TekVISA::Write(const std::string& command) {
+    if (!deviceFile_.is_open()) {
+        throw std::runtime_error("Dispositivo nao esta conectado.");
+    }
+    deviceFile_ << command << std::endl;
+}
+
+std::string TekVISA::Read() {
+    if (!deviceFile_.is_open()) {
+        throw std::runtime_error("Dispositivo nao esta conectado.");
+    }
+    std::string response;
+    std::getline(deviceFile_, response);
+    // Remove o caractere de retorno de carro '\r' que alguns dispositivos enviam
+    if (!response.empty() && response.back() == '\r') {
+        response.pop_back();
+    }
+    return response;
+}
+
+std::string TekVISA::Query(const std::string& command) {
+    Write(command);
+    usleep(100000); // Pequena pausa (100ms) para o dispositivo processar
+    return Read();
+}
+
+std::string TekVISA::GetID() {
+    return Query("*IDN?");
+}
+
+void TekVISA::Configure(const OscilloscopeConfigs& configs) {
+    Write(configs.DataFormatSet);
+    Write(configs.AcquireSet);
+    Write(configs.TriggerSet);
+    Write(configs.VisualizationSet);
+}
+
+void TekVISA::SetChannel(const std::string& channel) {
+    Write("DATA:SOURCE " + channel);
+    Write("MEASU:IMM:SOURCE " + channel);
+}
+
+void TekVISA::SetMeasurement(const std::vector<std::string>& measurements, const std::string& channel) {
+    for (size_t i = 0; i < measurements.size(); ++i) {
+        Write("MEASUREMENT:MEAS" + std::to_string(i + 1) + ":SOURCE " + channel);
+        Write("MEASUREMENT:MEAS" + std::to_string(i + 1) + ":TYPE " + measurements[i]);
+    }
+}
+
+void TekVISA::Run() {
+    Write("ACQUIRE:STATE ON;");
+}
+
+bool TekVISA::WaitData() {
+    std::string stateTrigger = Query("*OPC?");
+    return stateTrigger == "1";
+}
+
+std::vector<std::string> TekVISA::GetMeasurementsIMM(const std::vector<std::string>& measurements) {
+    std::vector<std::string> all;
+    for (const auto& meas_type : measurements) {
+        Write("MEASU:IMM:TYPE " + meas_type);
+        std::string meas = Query("MEASU:IMM:VAL?");
+        std::string esr = Query("*ESR?");
+        if (esr != "16") { // Verifica se não houve erro
+            all.push_back(meas);
+        }
+    }
+    return all;
+}
+
+std::vector<std::string> TekVISA::GetData() {
+    std::string all = Query("MEASU:MEAS1:VAL?;:MEASU:MEAS2:VAL?;:MEASU:MEAS3:VAL?;:MEASU:MEAS4:VAL?");
+    return split(all, ';');
+}
+
+std::vector<std::string> TekVISA::GetTriggerConf() {
+    std::string val = Query("TRIG:MAI:MOD?;TYPE?;LEVEL?;VIDEO:SOURCE?;:TRIG:MAI:EDGE:SLOPE?;COUP?;");
+    return split(val, ';');
+}
+
+std::vector<std::string> TekVISA::GetVisualizationConf() {
+    std::string val = Query("CH1:SCA?;POS?;:HOR:SCA?;POS?");
+    return split(val, ';');
+}
+
+// Implementação da função auxiliar split
+std::vector<std::string> TekVISA::split(const std::string& s, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}

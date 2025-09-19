@@ -1,12 +1,10 @@
 -- premake5.lua
-workspace "New Project"
-   architecture "x64"
+workspace "OscilloscopeAutomation"
    configurations { "Debug", "Release", "Dist" }
    startproject "App"
 
-   -- Workspace-wide build options for MSVC
-   filter "system:linux"
-      buildoptions { "/EHsc", "/Zc:preprocessor", "/Zc:__cplusplus" }
+filter "system:linux"
+    toolset "gcc"
 
 OutputDir = "%{cfg.system}-%{cfg.architecture}/%{cfg.buildcfg}"
 
