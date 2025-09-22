@@ -1,4 +1,4 @@
-/*
+
 using namespace std;
 
 #include <iostream>
@@ -66,7 +66,15 @@ public:
             return "";
         }
         buffer[read_bytes] = '\0';
+
         return std::string(buffer);
+    }
+
+    // Método para enviar e receber resposta
+    string Query(const string& cmd) {
+        Send(cmd);
+        usleep(100000);
+        return Receive();
     }
 };
 
@@ -144,11 +152,79 @@ public:
         return data;
     }
 
+    void TekVISA::Configure(const OscilloscopeConfigs& configs) {
+        mailman.Send(configs.DataFormatSet);
+        mailman.Send(configs.AcquireSet);
+        mailman.Send(configs.TriggerSet);
+        mailman.Send(configs.VisualizationSet);
+    }
+
+    void TekVISA::SetChannel(const string& channel) {
+    mailman.Send("DATA:SOURCE " + channel);
+    mailman.Send("MEASU:IMM:SOURCE " + channel);
+    }
+
+    void TekVISA::SetMeasurement(const vector<string>& measurements, const std::string& channel) {
+        for (size_t i = 0; i < measurements.size(); ++i) {
+            mailman.Send("MEASUREMENT:MEAS" + to_string(i + 1) + ":SOURCE " + channel);
+            mailman.Send("MEASUREMENT:MEAS" + to_string(i + 1) + ":TYPE " + measurements[i]);
+        }
+    }
+
+    void TekVISA::Run() {
+        mailman.Send("ACQUIRE:STATE ON;");
+    }
+
+    bool TekVISA::WaitData() {
+        string stateTrigger = mailman.Query("*OPC?");
+        return stateTrigger == "1";
+    }
+
+    vector<string> TekVISA::GetMeasurementsIMM(const vector<string>& measurements) {
+        vector<string> all;
+        for (const auto& meas_type : measurements) {
+            mailman.Send("MEASU:IMM:TYPE " + meas_type);
+            string meas = mailman.Query("MEASU:IMM:VAL?");
+            string esr = mailman.Query("*ESR?");
+            if (esr != "16") { // Verifica se não houve erro
+                all.push_back(meas);
+            }
+        }
+        return all;
+    }
+
+    vector<string> TekVISA::GetData() {
+        string all = mailman.Query("MEASU:MEAS1:VAL?;:MEASU:MEAS2:VAL?;:MEASU:MEAS3:VAL?;:MEASU:MEAS4:VAL?");
+        return split(all, ';');
+    }
+
+    vector<string> TekVISA::GetTriggerConf() {
+        string val = mailman.Query("TRIG:MAI:MOD?;TYPE?;LEVEL?;VIDEO:SOURCE?;:TRIG:MAI:EDGE:SLOPE?;COUP?;");
+        return split(val, ';');
+    }
+
+    vector<string> TekVISA::GetVisualizationConf() {
+        std::string val = mailman.Query("CH1:SCA?;POS?;:HOR:SCA?;POS?");
+        return split(val, ';');
+    }
+
+    // Implementação da função auxiliar split
+    vector<string> TekVISA::split(const string& s, char delimiter) {
+        vector<std::string> tokens;
+        string token;
+        istringstream tokenStream(s);
+        while (std::getline(tokenStream, token, delimiter)) {
+            tokens.push_back(token);
+        }
+        return tokens;
+    }
+
+
 
 
 };
-*/
 
+/*
 #include "TekVISA.h"
 #include <iostream>
 #include <sstream>
@@ -267,3 +343,5 @@ std::vector<std::string> TekVISA::split(const std::string& s, char delimiter) {
     }
     return tokens;
 }
+
+*/

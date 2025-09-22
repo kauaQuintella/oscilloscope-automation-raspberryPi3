@@ -23,7 +23,7 @@ public:
     ~TekVISA();
 
     // Conecta (abre o arquivo do dispositivo)
-    void Connect();
+    bool Connect();
 
     // Envia um comando para o osciloscópio
     void Write(const std::string& command);
