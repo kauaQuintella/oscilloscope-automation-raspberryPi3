@@ -1,0 +1,3 @@
+Acquisition Time [days]	Negative Width ["s"]	Fall Time ["s"]	Rise Time ["s"]	Peak-to-Peak ["V"]	Acquisition Time [days]	Negative Width ["s"]	Fall Time ["s"]	Rise Time ["s"]	Peak-to-Peak ["V"]
+2460957.781099536922	1.75E-8	7.7E-9	1.7E-8	1.8599998951E0	2460957.781099536922	1.72E-8	8.3E-9	2.1E-8	1.9599999189E0
+2460957.781145833433	1.78E-8	5.8E-9	1.24E-8	1.7199999094E0	2460957.781145833433	1.81E-8	9.7E-9	2.06E-8	2.1799998283E0
